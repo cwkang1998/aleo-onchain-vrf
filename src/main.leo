@@ -93,7 +93,7 @@ program aleo_onchain_vrf.aleo {
         let new_random: field = Poseidon2::hash_to_field(current_turn + last_random.random_value + last_random.game_hash + secret);
 
         return RandomNumber {
-            user: self.caller,
+            user: member.user,
             game_hash: last_random.game_hash,
             random_value: new_random,
             current_turn: current_turn

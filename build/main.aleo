@@ -69,7 +69,7 @@ function get_random:
     add r4 r0.random_value into r5;
     add r5 r0.game_hash into r6;
     add r6 r2 into r7;
-    hash.psd2 r7 into r8 as field;    cast self.caller r0.game_hash r8 r4 into r9 as RandomNumber;
+    hash.psd2 r7 into r8 as field;    cast r1.user r0.game_hash r8 r4 into r9 as RandomNumber;
     output r9 as RandomNumber.private;
 
     finalize r0.game_hash r4;
