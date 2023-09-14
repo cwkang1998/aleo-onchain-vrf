@@ -1,5 +1,5 @@
-// The 'sg_workshop' program.
-program sg_workshop.aleo {
+// The 'aleo_onchain_vrf' program.
+program aleo_onchain_vrf.aleo {
 
     // only support 4 players, a hack until array is introduced
 

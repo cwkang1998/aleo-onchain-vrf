@@ -1,4 +1,4 @@
-program sg_workshop.aleo;
+program aleo_onchain_vrf.aleo;
 
 struct MemberInit:
     member_addr as address;
