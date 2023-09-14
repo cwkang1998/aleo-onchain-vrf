@@ -3,88 +3,106 @@ program sg_workshop.aleo {
 
     // only support 4 players, a hack until array is introduced
 
-    // always use key = 1. a hack to bypass the lack of global storage for now
-    mapping current_turn: u8 => u128;
+    // Maps game -> counter
+    mapping game_hash_turn_counter: field => field;
 
     // owner contract
     // aleo166095pymd83g8essrv9wc6hvxp0lwd0gq3ysc5dcy2jxnc9h4s9qma7wj8
 
-    mapping turn_random_number: u128 => field;
+    struct MemberInit {
+        member_addr: address;
+        user_secret_hash: field;
+    }
 
-    // commitment for users secret
-    mapping user_secret_hash: address => field;
+    struct Member {
+        user: address;
+        game_hash: field;
+        user_secret_hash: field;
+    }
 
-    mapping init_game_hash: u8 => field;
+    struct RandomNumber{
+        user: address;
+        game_hash: field;
+        random_value: field;
+        current_turn: field;
+    }
 
-    transition init_user_secret_hash(secret: field) {
+    transition compute_user_secret_hash(secret: field) -> field {
         let secret_hashed: field = Poseidon2::hash_to_field(secret);
-        return then finalize(self.caller, secret_hashed);
-
+        assert_neq(secret_hashed, 0field);
+        return secret_hashed;
     }
 
-    finalize init_user_secret_hash(user: address, secret_hashed: field) {
-        // todo: check if user has set this value before
-        let existing_secret_hash: field = Mapping::get_or_use(user_secret_hash, user, 0field);
-        assert_eq(existing_secret_hash, 0field);
+    transition init_game_hash(
+        public player_1: MemberInit,
+        public player_2: MemberInit, 
+        public player_3: MemberInit, 
+        public player_4: MemberInit
+    ) -> (Member, Member, Member, Member, RandomNumber) {
+        assert_neq(player_1.user_secret_hash, 0field);
+        assert_neq(player_2.user_secret_hash, 0field);
+        assert_neq(player_3.user_secret_hash, 0field);
+        assert_neq(player_4.user_secret_hash, 0field);
+        let game_hash: field = player_1.user_secret_hash + player_2.user_secret_hash + player_3.user_secret_hash + player_4.user_secret_hash;
 
-        Mapping::set(user_secret_hash, user, secret_hashed);
+        let member_1: Member = Member {
+            game_hash,
+            user: player_1.member_addr,
+            user_secret_hash: player_1.user_secret_hash
+        };
+        let member_2: Member = Member {
+            game_hash,
+            user: player_2.member_addr,
+            user_secret_hash: player_2.user_secret_hash
+        };
+        let member_3: Member = Member {
+            game_hash,
+            user: player_3.member_addr,
+            user_secret_hash: player_3.user_secret_hash
+        };
+        let member_4: Member = Member {
+            game_hash,
+            user: player_4.member_addr,
+            user_secret_hash: player_4.user_secret_hash
+        };
+
+        let starting_record: RandomNumber = RandomNumber {
+            user: member_1.user,
+            game_hash, 
+            random_value: 1field,
+            current_turn: 0field
+        };
+        
+        return (member_1, member_2, member_3, member_4, starting_record) then finalize(game_hash);
     }
 
-    transition init_game_hash(public player_1: address, public player_2: address, 
-                public player_3: address, public player_4: address) {
-        return then finalize(player_1, player_2, player_3, player_4);
+    finalize init_game_hash (game_hash: field) {
+        Mapping::set(game_hash_turn_counter, game_hash, 0field);
     }
 
-    finalize init_game_hash (public player_1: address, public player_2: address, public player_3: address, public player_4: address) {
-        let const_key: u8 = 1u8;
-        let existing_game_hash: field = Mapping::get_or_use(init_game_hash, const_key, 0field);
-        // make sure game_hash not is set
-        assert_eq(existing_game_hash, 0field);
-
-        let user_1_secret_hash: field = Mapping::get_or_use(user_secret_hash, player_1, 0field);
-        assert_neq(user_1_secret_hash, 0field);
-
-        let user_2_secret_hash: field = Mapping::get_or_use(user_secret_hash, player_2, 0field);
-        assert_neq(user_2_secret_hash, 0field);
-
-        let user_3_secret_hash: field = Mapping::get_or_use(user_secret_hash, player_3, 0field);
-        assert_neq(user_3_secret_hash, 0field);
-
-        let user_4_secret_hash: field = Mapping::get_or_use(user_secret_hash, player_4, 0field);
-        assert_neq(user_4_secret_hash, 0field);
-
-        let game_hash: field = user_1_secret_hash + user_2_secret_hash + user_3_secret_hash + user_4_secret_hash;
-        Mapping::set(init_game_hash, const_key, game_hash);
-    }
-
-    transition get_random(secret: field) {
-        return then finalize(self.caller, secret);
-    }
-
-    finalize get_random(user: address, secret: field){
-        // get current run
-        // check if user hash matches user
-
-        let user_stored_hash: field = Mapping::get_or_use(user_secret_hash, user, 0field);
+    transition get_random(last_random: RandomNumber, member: Member, secret: field) -> RandomNumber {
+        assert_neq(last_random.user, self.caller);
+        assert_neq(last_random.user, member.user);
+        assert_eq(last_random.game_hash, member.game_hash);
+        assert_neq(last_random.game_hash, 0field);
+        
         let computed_user_hash: field = Poseidon2::hash_to_field(secret);
+        assert_eq(member.user_secret_hash, computed_user_hash);
 
-        assert_eq(user_stored_hash, computed_user_hash);
+        let current_turn: field = last_random.current_turn + 1field;
+        let new_random: field = Poseidon2::hash_to_field(current_turn + last_random.random_value + last_random.game_hash + secret);
 
-        // increment turn number
-        let const_key: u8 = 1u8;
-        let this_turn: u128 = Mapping::get_or_use(current_turn, const_key, 0u128);
-        let next_turn: u128 = this_turn + 1u128;
-        Mapping::set(current_turn, const_key, next_turn);    
+        return RandomNumber {
+            user: self.caller,
+            game_hash: last_random.game_hash,
+            random_value: new_random,
+            current_turn: current_turn
+        } then finalize(last_random.game_hash, current_turn);
+    }
 
-        // generate random number
-        let game_hash: field = Mapping::get_or_use(init_game_hash, const_key, 0field);
-        // make sure game_hash is set
-        assert_neq(game_hash, 0field);
-
-        let previous_random_number: field = Mapping::get_or_use(turn_random_number, this_turn, 0field);
-        let random: field = Poseidon2::hash_to_field(this_turn + previous_random_number + game_hash + secret);
-
-        // set randomness of this_turn
-        Mapping::set(turn_random_number, this_turn, random);
+    finalize get_random(game_hash: field, current_turn: field){
+        let last_turn: field = Mapping::get(game_hash_turn_counter, game_hash);
+        assert_eq(current_turn, last_turn + 1field);
+        Mapping::set(game_hash_turn_counter, game_hash, current_turn);    
     }
 }
