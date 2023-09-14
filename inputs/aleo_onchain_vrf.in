@@ -1,6 +1,6 @@
 // The program input for sg_workshop/src/main.leo
 [compute_user_secret_hash]
-secret: field = 103field;
+secret: field = 100001field;
 
 [init_game_hash]
 // 100field
@@ -37,4 +37,4 @@ member: Member = Member {
     game_hash: 7571057015730941990143459213534650058818343735290421916417010434384442343523field,
     user_secret_hash: 1916866650744865271241509820990367882428103130043613420607863419653524065772field,
 };
-secret: field = 101field;
+secret: field = 100001field;

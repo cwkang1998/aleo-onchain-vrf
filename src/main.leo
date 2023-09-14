@@ -80,7 +80,7 @@ program aleo_onchain_vrf.aleo {
         Mapping::set(game_hash_turn_counter, game_hash, 0field);
     }
 
-    transition get_random(last_random: RandomNumber, member: Member, secret: field) -> RandomNumber {
+    transition get_random(last_random: RandomNumber, member: Member, secret: field) -> (field, field) {
         assert_neq(last_random.user, self.caller);
         assert_neq(last_random.user, member.user);
         assert_eq(last_random.game_hash, member.game_hash);
@@ -88,21 +88,22 @@ program aleo_onchain_vrf.aleo {
         
         let computed_user_hash: field = Poseidon2::hash_to_field(secret);
         assert_eq(member.user_secret_hash, computed_user_hash);
+        return (member.user_secret_hash, computed_user_hash);
 
-        let current_turn: field = last_random.current_turn + 1field;
-        let new_random: field = Poseidon2::hash_to_field(current_turn + last_random.random_value + last_random.game_hash + secret);
+        // let current_turn: field = last_random.current_turn + 1field;
+        // let new_random: field = Poseidon2::hash_to_field(current_turn + last_random.random_value + last_random.game_hash + secret);
 
-        return RandomNumber {
-            user: member.user,
-            game_hash: last_random.game_hash,
-            random_value: new_random,
-            current_turn: current_turn
-        } then finalize(last_random.game_hash, current_turn);
+        // return RandomNumber {
+        //     user: member.user,
+        //     game_hash: last_random.game_hash,
+        //     random_value: new_random,
+        //     current_turn: current_turn
+        // } then finalize(last_random.game_hash, current_turn);
     }
 
-    finalize get_random(game_hash: field, current_turn: field){
-        let last_turn: field = Mapping::get(game_hash_turn_counter, game_hash);
-        assert_eq(current_turn, last_turn + 1field);
-        Mapping::set(game_hash_turn_counter, game_hash, current_turn);    
-    }
+    // finalize get_random(game_hash: field, current_turn: field){
+    //     let last_turn: field = Mapping::get(game_hash_turn_counter, game_hash);
+    //     assert_eq(current_turn, last_turn + 1field);
+    //     Mapping::set(game_hash_turn_counter, game_hash, current_turn);    
+    // }
 }

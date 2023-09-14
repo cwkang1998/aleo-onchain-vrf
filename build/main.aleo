@@ -65,19 +65,5 @@ function get_random:
     assert.eq r0.game_hash r1.game_hash;
     assert.neq r0.game_hash 0field;
     hash.psd2 r2 into r3 as field;    assert.eq r1.user_secret_hash r3;
-    add r0.current_turn 1field into r4;
-    add r4 r0.random_value into r5;
-    add r5 r0.game_hash into r6;
-    add r6 r2 into r7;
-    hash.psd2 r7 into r8 as field;    cast r1.user r0.game_hash r8 r4 into r9 as RandomNumber;
-    output r9 as RandomNumber.private;
-
-    finalize r0.game_hash r4;
-
-finalize get_random:
-    input r0 as field.public;
-    input r1 as field.public;
-    get game_hash_turn_counter[r0] into r2;
-    add r2 1field into r3;
-    assert.eq r1 r3;
-    set r1 into game_hash_turn_counter[r0];
+    output r1.user_secret_hash as field.private;
+    output r3 as field.private;
