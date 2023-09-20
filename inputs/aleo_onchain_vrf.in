@@ -4,23 +4,23 @@ secret: field = 103field;
 
 [init_game_hash]
 // 100field
-public player_1: MemberInit = MemberInit {
-    member_addr: aleo1cd3v453y0n0ntl2gw7l3fpksp2ae9s46rzlt87mup2gth0asygzq9k5q0l,
+public player_1: PlayerInit = PlayerInit {
+    player_addr: aleo1cd3v453y0n0ntl2gw7l3fpksp2ae9s46rzlt87mup2gth0asygzq9k5q0l,
     user_secret_hash: 7335703844600542679033062211483736847653765276900649700767344550218958631802field
 };
 // 101field
-public player_2: MemberInit = MemberInit {
-    member_addr: aleo1k4pdvq6gh8duzqd3g4p852p2j7xn76dhfmx0ds9lj6sg96g7k5xqsxvc5y,
+public player_2: PlayerInit = PlayerInit {
+    player_addr: aleo1k4pdvq6gh8duzqd3g4p852p2j7xn76dhfmx0ds9lj6sg96g7k5xqsxvc5y,
     user_secret_hash: 1916866650744865271241509820990367882428103130043613420607863419653524065772field
 };
 // 102field
-public player_3: MemberInit = MemberInit {
-    member_addr: aleo19hdxv0h4nhrtd68cgvfszvavhgxx765zj2vm93k2dnc55vdza5zq5nwxsh,
+public player_3: PlayerInit = PlayerInit {
+    player_addr: aleo19hdxv0h4nhrtd68cgvfszvavhgxx765zj2vm93k2dnc55vdza5zq5nwxsh,
     user_secret_hash: 8063113796567896899791860693652578285507024304475589383680929656597160250795field
 };
 // 103field
-public player_4: MemberInit = MemberInit {
-    member_addr: aleo1c5c24skzvfxuegt0ykeldhcv8s7nstfjk530qdywga5jaacn9g8qk7musl,
+public player_4: PlayerInit = PlayerInit {
+    player_addr: aleo1c5c24skzvfxuegt0ykeldhcv8s7nstfjk530qdywga5jaacn9g8qk7musl,
     user_secret_hash: 7144296222674377988574676364971060105981249694178697067231339719749617873236field
 };
 
@@ -32,7 +32,7 @@ last_random: RandomNumber = RandomNumber {
     random_value: 1field,
     current_turn: 0field,
 };
-member: Member = Member {
+player: Player = Player {
     user: aleo1k4pdvq6gh8duzqd3g4p852p2j7xn76dhfmx0ds9lj6sg96g7k5xqsxvc5y,
     game_hash: 7571057015730941990143459213534650058818343735290421916417010434384442343523field,
     user_secret_hash: 1916866650744865271241509820990367882428103130043613420607863419653524065772field,
